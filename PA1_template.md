@@ -8,7 +8,8 @@ output:
 
 The following libraries were used: **dplyr** **xtable**
 
-```{r, message=FALSE,warning=FALSE,error=FALSE}
+
+```r
 library(dplyr)
 library(xtable)
 ```
@@ -17,53 +18,71 @@ library(xtable)
 
 1. Unzip the data zip file:
 
-```{r, warning=FALSE}
+
+```r
 unzip("activity.zip",overwrite = FALSE)
 ```
 
 2. Read the activity.csv file into a data frame.
 
-```{r}
+
+```r
 rawActivity <- read.csv("activity.csv")
 ```
 
 3. Group the activities by day to calculate daily values.
 
-```{r}
+
+```r
 groupedActivity <- group_by(rawActivity,date)
 ```
 
 ## What is mean total number of steps taken per day?
 1. First, calculate the total steps taken per day
 
-```{r}
+
+```r
 totalActivity <- groupedActivity %>% summarize_all(sum)
 ```
 
 2. Plot a histogram of the steps taken each day
 
-```{r}
+
+```r
 hist(totalActivity$steps, xlab="Total Daily Steps",
      main="Characteristics of Total Steps per Day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
 3. Next, take the mean of the steps column.
 
-```{r}
+
+```r
 mean(totalActivity$steps,na.rm=TRUE)
+```
+
+```
+## [1] 10766.19
 ```
 
 4. Last, take the median of the steps column.
 
-```{r}
+
+```r
 median(totalActivity$steps,na.rm=TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 
 1. Produce a time-series plot of activity during each interval
 
-```{r}
+
+```r
 intervalAct <- group_by(rawActivity[,c(1,3)],interval)
 
 averagedAct <- intervalAct %>% summarize_all(mean,na.rm=TRUE)
@@ -75,27 +94,43 @@ plot(x = averagedAct$interval,
      ylab = "Number of Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
 2. Calculate the interval with the highest average steps
 
-```{r xtable, results='asis'}
+
+```r
 orderedAct <- arrange(averagedAct,
                       desc(averagedAct$steps))
 print(xtable(orderedAct[1,]), type="html")
 ```
 
+<!-- html table generated in R 4.0.3 by xtable 1.8-4 package -->
+<!-- Mon Feb 22 16:04:48 2021 -->
+<table border=1>
+<tr> <th>  </th> <th> interval </th> <th> steps </th>  </tr>
+  <tr> <td align="right"> 1 </td> <td align="right"> 835 </td> <td align="right"> 206.17 </td> </tr>
+   </table>
+
 ## Imputing missing values
 
 1. Calculate the total missing values:
 
-```{r}
+
+```r
 missing <- is.na(rawActivity)
 
 sum(missing)
 ```
 
+```
+## [1] 2304
+```
+
 2. Develop a function to perform imputation of missing activity values with the mean activity value for that 5-minute interval.
 
-```{r}
+
+```r
 imputeAct <- function(actData) {
   actCol <- actData$steps
   step <- 1
@@ -109,28 +144,43 @@ imputeAct <- function(actData) {
 ```
 
 3. Create anew dataset with missing data filled in
-```{r}
+
+```r
 imputed <- imputeAct(rawActivity)
 imputedTotal <- imputed %>% group_by(date) %>% summarise_all(sum)
 ```
 4. Make a histogram of total steps each day
-```{r}
+
+```r
 hist(imputedTotal$steps, xlab="Total Daily Steps",
      main="Characteristics of Total Steps per Day (Imputed)")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+
 5. Calculate Mean daily steps
-```{r}
+
+```r
 mean(imputedTotal$steps)
 ```
+
+```
+## [1] 10766.19
+```
 6. Calculate Median daily steps
-```{r}
+
+```r
 median(imputedTotal$steps)
+```
+
+```
+## [1] 10766.19
 ```
 ## Are there differences in activity patterns between weekdays and weekends?
 
 1. Factorize activity data by weekend and weekday
-```{r}
+
+```r
 datedImputed <- imputed
 datedImputed$date <- as.Date(datedImputed$date,"%Y-%m-%d")
 datedImputed$dayOfWeek <- weekdays(datedImputed$date)
@@ -155,7 +205,8 @@ datedImputed <- datedImputed %>% group_by(dayType)
 ```
 
 2. Generate panel plot of steps versus intervals for weekday and weekend categories.
-```{r}
+
+```r
 #intervalAct <- group_by(rawActivity[,c(1,3)],interval)
 #averagedAct <- intervalAct %>% summarize_all(mean,na.rm=TRUE)
 
@@ -183,3 +234,5 @@ plot(x = weekendAvg$interval,
      ylab = "Number of Steps",
      main = "Weekend Activity")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
